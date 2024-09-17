@@ -5,8 +5,6 @@
 
 A simple library that implements the State Monad in Gleam!
 
-![Leviathan](./thumbnail.png)
-
 ## Example
 
 ```gleam
