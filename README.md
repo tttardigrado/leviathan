@@ -10,7 +10,7 @@ A simple library that implements the State Monad in Gleam!
 ```gleam
 import leviathan as lv
 
-fn tick() -> lv.State(s, Nil) {
+fn tick() -> lv.State(Int, Nil) {
   use x <- lv.do(lv.get())
   lv.put(x + 1)
 }
