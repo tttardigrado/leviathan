@@ -33,6 +33,37 @@ pub fn do(st: State(s, a), f: fn(a) -> State(s, b)) -> State(s, b) {
   })
 }
 
+/// Execute the state function st1 ignoring its return value
+/// Then Execute the state function st2
+pub fn seq(st1: State(s, a), st2: State(s, b)) -> State(s, b) {
+  use _ <- do(st1)
+  st2
+}
+
+/// Execute a list of state functions `sts`, returning a list of resulting values
+pub fn all(sts: List(State(s, a))) -> State(s, List(a)) {
+  case sts {
+    [] -> return([])
+    [st, ..rest] -> {
+      use x <- do(st)
+      use xs <- do(all(rest))
+      return([x, ..xs])
+    }
+  }
+}
+
+/// Execute a list of state functions `sts` ignoring their results
+pub fn exec_all(sts: List(State(s, a))) -> State(s, Nil) {
+  case sts {
+    [] -> return(Nil)
+    [st, ..rest] -> {
+      use _ <- do(st)
+      use _ <- do(exec_all(rest))
+      return(Nil)
+    }
+  }
+}
+
 /// Sets the resulting value to the current state
 pub fn get() -> State(s, s) {
   State(fn(s) { #(s, s) })
@@ -58,4 +89,19 @@ pub fn map(st: State(s, a), f: fn(a) -> b) -> State(s, b) {
       #(x, s2) -> #(f(x), s2)
     }
   })
+}
+
+/// Generate a new integer identifier
+pub fn gen_id() -> State(Int, Int) {
+  use n <- do(get())
+  use _ <- do(put(n + 1))
+  return(n)
+}
+
+/// Execute a statefull computation without affecting the global state
+pub fn locally(st : State(s, a)) -> State(s, a) {
+  use old <- do(get())
+  use val <- do(st)
+  use _   <- do(put(old))
+  return(val)
 }
